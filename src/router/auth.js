@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const { validateSignupData } = require("../utils/validator");
 const authRouter = express.Router();
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("../middlewares/auth");
 
 authRouter.post("/signup", async (req, res) => {
     try {
@@ -25,35 +26,52 @@ authRouter.post("/signup", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
     console.log(req.body);
-    if(req.body.emailId && req.body.password) {
+    if (req.body.emailId && req.body.password) {
         const { emailId, password } = req.body;
 
-    const user = await User.findOne({ emailId: emailId });
-    if (!user) {
-        res.status(404).json("Email is not present in DB");
-    }
-    let isPasswordValid;
-    if(password && user?.password){
-        isPasswordValid = await bcrypt.compare(password, user?.password);
-    }
-    if (!isPasswordValid) {
-        res.status(404).json("Invalid credentials");
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+            return res.status(404).json({
+                message: "Email is not present in DB",
+                data: req.body
+            });
+        }
+        let isPasswordValid;
+        if (password && user?.password) {
+            isPasswordValid = await bcrypt.compare(password, user?.password);
+        }
+        if (!isPasswordValid) {
+            return res.status(404).json({
+                message: "Invalid credentials",
+                data: req.body
+            });
+        }
+        else {
+            const token = await jwt.sign({ _id: user.id }, "secretkey");
+            res.cookie("token", token);
+            return res.json({
+                message: "Logged in successfully",
+                data: user
+            })
+        }
     }
     else {
-        const token = await jwt.sign({_id:user.id},"secretkey");
-        res.cookie("token", token);
-        res.send("Logged in successfully")
-    }
-    }
-    else{
-        res.status(404).json("Invalid payload");
+        return res.status(404).json({
+            message: "Invalid payload",
+            data: req.body
+        });
     }
 
 });
 
 authRouter.post("/logout", async (req, res) => {
-    req.cookies("token", null);
-    res.send("Logged out successfully");
+    const { emailId } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    res.cookie("token", null);
+    res.json({
+        message: "Logged out successfully",
+        data: user
+    })
 }
 );
 
