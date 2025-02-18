@@ -5,6 +5,7 @@ const Connections = require("../models/connections");
 const { userAuth } = require("../middlewares/auth");
 const userRouter = express.Router();
 const USER_SAFE_DATA = "firstName lastName email";
+const bcrypt = require('bcrypt');
 //get single user
 userRouter.get("/user/profile", async (req, res) => {
     try {
@@ -218,6 +219,32 @@ userRouter.post(
         }
     }
 );
+
+
+userRouter.patch("/user/profile/resetPassword", async (req, res) => {
+    const { emailId, newPassword } = req.body;
+    try {
+        const passwordHash = await bcrypt.hash(newPassword, 3);
+        const user = await User.findOneAndUpdate(
+            { emailId: emailId },
+            { password: passwordHash },
+            { new: true }
+        );
+
+        if (user) {
+            res.json({
+                message: "user password changed successfully",
+                data: user
+            });
+        }
+        else {
+            res.status(400).send("No records found");
+        }
+    }
+    catch {
+        res.status(400).send("something went wrong")
+    }
+});
 
 
 module.exports = userRouter;

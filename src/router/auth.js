@@ -5,6 +5,7 @@ const { validateSignupData } = require("../utils/validator");
 const authRouter = express.Router();
 const jwt = require("jsonwebtoken");
 const { userAuth } = require("../middlewares/auth");
+const nodemailer = require('nodemailer');
 
 authRouter.post("/signup", async (req, res) => {
     try {
@@ -73,5 +74,32 @@ authRouter.post("/logout", async (req, res) => {
     })
 }
 );
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // You can use other services like 'yahoo', 'hotmail', etc.
+    auth: {
+        user: "prafulkusugal@gmail.com", // Your email address
+        pass: "pakm rqea xxdr yffd"
+    }
+});
+
+// Endpoint to send email
+authRouter.post('/sendEmail', async (req, res) => {
+    const { to,otp} = req.body;
+
+    const mailOptions = {
+        from: "prafulkusugal@gmail.com", // Sender address
+        to: to,                       // List of recipients
+        subject: "Reset DevTinder Password",             // Subject line
+        text: "Please use this OTP " + otp +" to reset DevTinder Password"                    // Plain text body
+    };
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        res.json({ message: 'Email sent successfully', info });
+    } catch (error) {
+        res.status(500).send({ message: 'Failed to send email', error: error.message });
+    }
+});
 
 module.exports = authRouter;
