@@ -13,11 +13,13 @@ const userSchema = new Schema({
     unique: true
   },
   password: String,
-  age: {
-    type: Number,
-    min:18
+  dob: {
+    type: String,
   },
-  gender: String
+  gender: String,
+  photoURL:String,
+  about:String,
+  skills: [String],
 });
 
 const userModel = mongoose.model('user', userSchema);

@@ -8,7 +8,6 @@ connectionRequestRouter.post("/request/send/:status/:toUserId", userAuth, async 
     try {
 
         const fromUserId = req.user._id.toString();
-        console.log("fromUserId:",fromUserId);
         const toUserId = req.params.toUserId;
         const status = req.params.status;;
 
@@ -19,9 +18,7 @@ connectionRequestRouter.post("/request/send/:status/:toUserId", userAuth, async 
         //if all passed then only save
         //here from user is logged in user
         const toUser = await User.findById(toUserId);
-        console.log("toUSer:",toUser);
         const {firstName} = toUser;
-        console.log("firstName",firstName)
         if (!toUser) {
             return res.status(404).json({ message: "user not found" });
         }

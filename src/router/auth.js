@@ -25,7 +25,6 @@ authRouter.post("/signup", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-    console.log(req.body);
     if (req.body.emailId && req.body.password) {
         const { emailId, password } = req.body;
 

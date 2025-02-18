@@ -8,7 +8,6 @@ const USER_SAFE_DATA = "firstName lastName email";
 //get single user
 userRouter.get("/user/profile", async (req, res) => {
     try {
-        console.log(req.cookies);
         const user = await User.find({});
         if (user.length > 0) {
             res.send(user);
@@ -56,7 +55,16 @@ userRouter.delete("/user/profile/delete", async (req, res) => {
 userRouter.patch("/user/profile/update", async (req, res) => {
     const { userId, ...updateData } = req.body;
     try {
-        const user = await User.findByIdAndUpdate(userId, { firstName: updateData.firstName, lastName: updateData.lastName }, { new: true });
+        const user = await User.findByIdAndUpdate(userId,
+            {
+                firstName: updateData.firstName,
+                lastName: updateData.lastName,
+                gender: updateData.gender,
+                dob: updateData.dob,
+                photoURL: updateData.photoURL,
+                about: updateData.about,
+                skills: updateData.skills
+            }, { new: true });
         if (user) {
             res.json({
                 message: "user updated successfully",
@@ -80,16 +88,13 @@ userRouter.get("/user/request/recieved", userAuth, async (req, res) => {
         const user = await User.find({
             _id: objectId,
         });
-        console.log("user:", user);
 
         const connectionRequestsCollection = await Connections.find({});
-        console.log("connectionRequestsCollection:", connectionRequestsCollection);
 
         const connectionRequests1 = await Connections.find({
             status: "interested",
             toUserId: loggedInUser._id.toString()
         });
-        console.log("connectionRequests1:", connectionRequests1);
 
 
         res.json({
@@ -114,11 +119,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
             .populate("fromUserId", USER_SAFE_DATA)
             .populate("toUserId", USER_SAFE_DATA);
 
-        console.log(connectionRequests);
 
         const data = connectionRequests.map((row) => {
-            console.log(row);
-            console.log(loggedInUser)
             if (row.fromUserId.toString() === loggedInUser._id.toString()) {
                 return row.toUserId;
             }

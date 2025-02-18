@@ -9,11 +9,14 @@ const connectionRequestRouter = require("./router/connectionRequest");
 const app = express();
 
 app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true,
-    })
-  );
+  cors({
+    origin: "http://localhost:4200",
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", authRouter);
